@@ -1,0 +1,61 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model PortfolioItem {
+  id          Int      @id @default(autoincrement())
+  title       String
+  slug        String   @unique
+  imageUrl    String
+  altText     String
+  description String?
+  style       String
+  featured    Boolean  @default(false)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([sortOrder, createdAt])
+}
+
+model PriceItem {
+  id          Int      @id @default(autoincrement())
+  serviceName String
+  price       Int
+  description String?
+  category    String
+  duration    String?
+  featured    Boolean  @default(false)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([category, sortOrder])
+}
+
+model AdminUser {
+  id               Int       @id @default(autoincrement())
+  username         String    @unique
+  passwordHash     String
+  failedLoginCount Int       @default(0)
+  lockedUntil      DateTime?
+  sessions         Session[]
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+}
+
+model Session {
+  id        Int       @id @default(autoincrement())
+  tokenHash String    @unique
+  adminId   Int
+  admin     AdminUser @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime  @default(now())
+
+  @@index([expiresAt])
+}
