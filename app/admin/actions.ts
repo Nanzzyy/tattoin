@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createSession, destroySession, requireAdmin, verifyLogin } from "@/lib/auth";
 import { createPortfolioItem, createPriceItem, removePortfolioItem, removePriceItem, updatePortfolioItem, updatePriceItem } from "@/lib/content";
+import { PUBLIC_CONTENT_CACHE_TAG } from "@/lib/site-content";
 import { firstZodError, portfolioSchema, priceSchema } from "@/lib/validation";
 
 export type FormState = { message: string; success?: boolean };
@@ -49,7 +50,7 @@ export async function savePortfolioAction(id: number | null, _state: FormState, 
   }
 
   revalidatePath("/");
-  revalidateTag("public-site-content", "max");
+  revalidateTag(PUBLIC_CONTENT_CACHE_TAG, "max");
   revalidatePath("/admin");
   revalidatePath("/admin/portfolio");
   redirect("/admin/portfolio?saved=1");
@@ -59,7 +60,7 @@ export async function deletePortfolioAction(id: number) {
   await requireAdmin();
   await removePortfolioItem(id);
   revalidatePath("/");
-  revalidateTag("public-site-content", "max");
+  revalidateTag(PUBLIC_CONTENT_CACHE_TAG, "max");
   revalidatePath("/admin");
   revalidatePath("/admin/portfolio");
   redirect("/admin/portfolio?deleted=1");
@@ -78,7 +79,7 @@ export async function savePriceAction(id: number | null, _state: FormState, form
   }
 
   revalidatePath("/");
-  revalidateTag("public-site-content", "max");
+  revalidateTag(PUBLIC_CONTENT_CACHE_TAG, "max");
   revalidatePath("/admin");
   revalidatePath("/admin/prices");
   redirect("/admin/prices?saved=1");
@@ -88,7 +89,7 @@ export async function deletePriceAction(id: number) {
   await requireAdmin();
   await removePriceItem(id);
   revalidatePath("/");
-  revalidateTag("public-site-content", "max");
+  revalidateTag(PUBLIC_CONTENT_CACHE_TAG, "max");
   revalidatePath("/admin");
   revalidatePath("/admin/prices");
   redirect("/admin/prices?deleted=1");

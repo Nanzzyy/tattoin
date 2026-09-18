@@ -29,7 +29,8 @@ function bucketName() {
 }
 
 export function publicObjectUrl(key: string) {
-  const baseUrl = required("R2_PUBLIC_URL").replace(/\/$/, "");
+  const configuredUrl = required("R2_PUBLIC_URL").trim().replace(/\/$/, "");
+  const baseUrl = /^https?:\/\//i.test(configuredUrl) ? configuredUrl : `https://${configuredUrl}`;
   return `${baseUrl}/${key.split("/").map(encodeURIComponent).join("/")}`;
 }
 

@@ -1,6 +1,8 @@
 import { unstable_cache } from "next/cache";
 import { getPrisma } from "@/lib/prisma";
 
+export const PUBLIC_CONTENT_CACHE_TAG = "public-site-content-v2";
+
 export const getPublicContent = unstable_cache(
   async () => {
     const prisma = await getPrisma();
@@ -9,6 +11,6 @@ export const getPublicContent = unstable_cache(
       prisma.priceItem.findMany({ orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }] }),
     ]);
   },
-  ["public-site-content"],
-  { revalidate: 60, tags: ["public-site-content"] },
+  [PUBLIC_CONTENT_CACHE_TAG],
+  { revalidate: 60, tags: [PUBLIC_CONTENT_CACHE_TAG] },
 );
