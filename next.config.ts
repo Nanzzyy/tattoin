@@ -5,7 +5,8 @@ const nextConfig: NextConfig = {
     root: process.cwd(),
   },
   allowedDevOrigins: ["nine-lives.tailc3c9e0.ts.net", "100.95.212.83"],
-  output: "standalone",
+  // Vercel creates its own Build Output API artifacts; standalone is for the Docker/Coolify image.
+  output: process.env.VERCEL ? undefined : "standalone",
   images: {
     formats: ["image/avif", "image/webp"],
     minimumCacheTTL: 86_400,
