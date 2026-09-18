@@ -3,9 +3,10 @@ import { deletePriceAction } from "@/app/admin/actions";
 import { DeleteButton } from "@/components/admin/delete-button";
 import { Edit, Plus } from "@/components/icons";
 import { formatIDR } from "@/lib/format";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 
 export default async function PricesPage({ searchParams }: { searchParams: Promise<{ saved?: string; deleted?: string }> }) {
+  const prisma = await getPrisma();
   const [items, query] = await Promise.all([
     prisma.priceItem.findMany({ orderBy: [{ sortOrder: "asc" }, { updatedAt: "desc" }] }),
     searchParams,

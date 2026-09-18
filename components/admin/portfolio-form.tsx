@@ -1,6 +1,6 @@
 "use client";
 
-import type { PortfolioItem } from "@/generated/prisma/client";
+import type { PortfolioItem } from "@prisma/client";
 import { useActionState, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -30,7 +30,7 @@ export function PortfolioForm({ item }: { item?: PortfolioItem }) {
         <div className="imageField">
           <label>Artwork image<span>{item ? "Leave empty to keep the current image." : "JPG, PNG, WebP, or AVIF · max 8 MB"}</span></label>
           <label className="imageDrop">
-            {(preview || item?.imageUrl) ? <Image src={preview ?? item!.imageUrl} alt="Artwork preview" fill unoptimized={Boolean(preview)} /> : <div><b>＋</b><strong>Choose an image</strong><span>or drop it here</span></div>}
+            {(preview || item?.imageUrl) ? <Image src={preview ?? item!.imageUrl} alt="Artwork preview" fill unoptimized /> : <div><b>＋</b><strong>Choose an image</strong><span>or drop it here</span></div>}
             <input name="image" type="file" accept="image/jpeg,image/png,image/webp,image/avif" required={!item} onChange={(event) => { const file = event.target.files?.[0]; if (file) setPreview(URL.createObjectURL(file)); }} />
             {(preview || item?.imageUrl) && <span className="replaceImage">Replace image</span>}
           </label>

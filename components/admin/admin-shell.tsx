@@ -28,12 +28,12 @@ export function AdminShell({ username, children }: { username: string; children:
           })}
         </nav>
         <div className="adminSidebarFoot">
-          <a href="/" target="_blank">View live site <ArrowUpRight /></a>
+          <a href="/" target="_blank" rel="noreferrer">View live site <ArrowUpRight /></a>
           <form action={logoutAction}><button type="submit"><span>{username.slice(0, 1).toUpperCase()}</span><div><b>{username}</b><small>Sign out</small></div></button></form>
         </div>
       </aside>
       <div className="adminStage">
-        <header className="adminMobileHeader"><button type="button" onClick={() => setOpen(true)} aria-label="Open navigation"><Menu /></button><b>TATTOIN</b><a href="/" target="_blank" aria-label="View site"><ArrowUpRight /></a></header>
+        <header className="adminMobileHeader"><button type="button" onClick={() => setOpen(true)} aria-label="Open navigation"><Menu /></button><b>TATTOIN</b><a href="/" target="_blank" rel="noreferrer" aria-label="View site"><ArrowUpRight /></a></header>
         {children}
       </div>
       {open && <button type="button" className="adminOverlay" aria-label="Close navigation" onClick={() => setOpen(false)} />}

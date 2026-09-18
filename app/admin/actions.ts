@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createSession, destroySession, requireAdmin, verifyLogin } from "@/lib/auth";
@@ -49,6 +49,7 @@ export async function savePortfolioAction(id: number | null, _state: FormState, 
   }
 
   revalidatePath("/");
+  revalidateTag("public-site-content", "max");
   revalidatePath("/admin");
   revalidatePath("/admin/portfolio");
   redirect("/admin/portfolio?saved=1");
@@ -58,6 +59,7 @@ export async function deletePortfolioAction(id: number) {
   await requireAdmin();
   await removePortfolioItem(id);
   revalidatePath("/");
+  revalidateTag("public-site-content", "max");
   revalidatePath("/admin");
   revalidatePath("/admin/portfolio");
   redirect("/admin/portfolio?deleted=1");
@@ -76,6 +78,7 @@ export async function savePriceAction(id: number | null, _state: FormState, form
   }
 
   revalidatePath("/");
+  revalidateTag("public-site-content", "max");
   revalidatePath("/admin");
   revalidatePath("/admin/prices");
   redirect("/admin/prices?saved=1");
@@ -85,6 +88,7 @@ export async function deletePriceAction(id: number) {
   await requireAdmin();
   await removePriceItem(id);
   revalidatePath("/");
+  revalidateTag("public-site-content", "max");
   revalidatePath("/admin");
   revalidatePath("/admin/prices");
   redirect("/admin/prices?deleted=1");

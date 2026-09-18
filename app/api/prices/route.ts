@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import { getCurrentAdmin } from "@/lib/auth";
 import { createPriceItem } from "@/lib/content";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 import { firstZodError, priceSchema } from "@/lib/validation";
 
 export async function GET() {
+  const prisma = await getPrisma();
   const items = await prisma.priceItem.findMany({ orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }] });
   return NextResponse.json({ data: items }, { headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300" } });
 }

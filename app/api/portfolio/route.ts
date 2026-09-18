@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import { getCurrentAdmin } from "@/lib/auth";
 import { createPortfolioItem } from "@/lib/content";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 import { firstZodError, portfolioSchema } from "@/lib/validation";
 
 export async function GET() {
+  const prisma = await getPrisma();
   const items = await prisma.portfolioItem.findMany({ orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }] });
   return NextResponse.json({ data: items }, { headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300" } });
 }

@@ -3,9 +3,10 @@ import Link from "next/link";
 import { deletePortfolioAction } from "@/app/admin/actions";
 import { DeleteButton } from "@/components/admin/delete-button";
 import { Edit, Plus } from "@/components/icons";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 
 export default async function PortfolioPage({ searchParams }: { searchParams: Promise<{ saved?: string; deleted?: string }> }) {
+  const prisma = await getPrisma();
   const [items, query] = await Promise.all([
     prisma.portfolioItem.findMany({ orderBy: [{ sortOrder: "asc" }, { updatedAt: "desc" }] }),
     searchParams,
@@ -18,7 +19,7 @@ export default async function PortfolioPage({ searchParams }: { searchParams: Pr
       {items.length ? <div className="adminPortfolioGrid">
         {items.map((item) => (
           <article key={item.id}>
-            <div className="adminArtwork"><Image src={item.imageUrl} alt={item.altText} fill sizes="(max-width: 700px) 100vw, 30vw" />{item.featured && <span>Featured</span>}</div>
+            <div className="adminArtwork"><Image src={item.imageUrl} alt={item.altText} fill unoptimized sizes="(max-width: 700px) 100vw, 30vw" />{item.featured && <span>Featured</span>}</div>
             <div className="adminArtworkMeta"><div><p>{item.style}</p><h2>{item.title}</h2><small>Order {item.sortOrder} · Updated {item.updatedAt.toLocaleDateString("en-GB")}</small></div><div className="cardActions"><Link className="iconButton" href={`/admin/portfolio/${item.id}/edit`} aria-label={`Edit ${item.title}`}><Edit /></Link><form action={deletePortfolioAction.bind(null, item.id)}><DeleteButton label={item.title} /></form></div></div>
           </article>
         ))}

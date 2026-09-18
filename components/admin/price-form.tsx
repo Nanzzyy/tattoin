@@ -1,6 +1,6 @@
 "use client";
 
-import type { PriceItem } from "@/generated/prisma/client";
+import type { PriceItem } from "@prisma/client";
 import { useActionState } from "react";
 import Link from "next/link";
 import { savePriceAction } from "@/app/admin/actions";

@@ -3,9 +3,9 @@ import Link from "next/link";
 import { ArrowRight, ArrowUpRight, Instagram } from "@/components/icons";
 import { SiteHeader } from "@/components/site-header";
 import { formatIDR } from "@/lib/format";
-import { prisma } from "@/lib/prisma";
+import { getPublicContent } from "@/lib/site-content";
 
-export const revalidate = 3600;
+export const dynamic = "force-dynamic";
 
 const whatsapp = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "6281234567890";
 const bookingUrl = `https://wa.me/${whatsapp}?text=${encodeURIComponent("Hi Tattoin, I'd like to book a tattoo consultation.")}`;
@@ -17,10 +17,7 @@ const approach = [
 ];
 
 export default async function Home() {
-  const [portfolio, prices] = await Promise.all([
-    prisma.portfolioItem.findMany({ orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }] }),
-    prisma.priceItem.findMany({ orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }] }),
-  ]);
+  const [portfolio, prices] = await getPublicContent();
 
   const structuredData = {
     "@context": "https://schema.org",
@@ -71,7 +68,7 @@ export default async function Home() {
             {portfolio.map((item, index) => (
               <article className={`portfolioCard reveal portfolioCard--${index % 5}`} key={item.id} style={{ "--delay": `${(index % 3) * 90}ms` } as React.CSSProperties}>
                 <div className="portfolioImage">
-                  <Image src={item.imageUrl} alt={item.altText} fill sizes={index === 2 ? "(max-width: 700px) 100vw, 55vw" : "(max-width: 700px) 100vw, 40vw"} />
+                  <Image src={item.imageUrl} alt={item.altText} fill unoptimized sizes={index === 2 ? "(max-width: 700px) 100vw, 55vw" : "(max-width: 700px) 100vw, 40vw"} />
                   <span>{String(index + 1).padStart(2, "0")}</span>
                 </div>
                 <div className="portfolioMeta"><div><h3>{item.title}</h3><p>{item.style}</p></div>{item.featured && <small>Featured</small>}</div>
@@ -82,8 +79,32 @@ export default async function Home() {
           <a className="textLink" href="https://instagram.com" target="_blank" rel="noreferrer"><Instagram /> See the full archive on Instagram <ArrowRight /></a>
         </section>
 
-        <section className="manifesto" id="studio" aria-labelledby="manifesto-title">
-          <div className="manifestoBackdrop" aria-hidden="true">T</div>
+        <section className="section studioSection" id="studio" aria-labelledby="studio-title">
+          <div className="studioIntro reveal">
+            <p className="eyebrow"><span /> Inside the studio</p>
+            <div>
+              <h2 id="studio-title">A room made for<br /><em>good work.</em></h2>
+              <p>Tattoin is a private atelier in the heart of Canggu—quiet, considered, and open by appointment only.</p>
+            </div>
+          </div>
+          <div className="studioFeature">
+            <div className="studioPhoto reveal">
+              <Image src="/images/studio-interior.png" alt="Interior of the Tattoin tattoo studio with a tattoo chair and workstation" fill sizes="(max-width: 760px) 100vw, 68vw" />
+            </div>
+            <div className="studioInfo reveal">
+              <p className="eyebrow"><span /> The space</p>
+              <h3>Private by design.</h3>
+              <p>One calm room, one focused session, and enough time to get every detail right.</p>
+              <dl>
+                <div><dt>Location</dt><dd>Canggu, Bali</dd></div>
+                <div><dt>Sessions</dt><dd>By appointment</dd></div>
+                <div><dt>Clients</dt><dd>18+ only</dd></div>
+              </dl>
+            </div>
+          </div>
+        </section>
+
+        <section className="manifesto" aria-labelledby="manifesto-title">
           <div className="manifestoInner reveal">
             <p className="eyebrow eyebrow--center"><span /> Our philosophy <span /></p>
             <blockquote id="manifesto-title">“A tattoo should feel like it has <em>always</em> belonged to you.”</blockquote>

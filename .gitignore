@@ -17,8 +17,8 @@
 *.db
 *.db-journal
 /generated/prisma
-public/uploads/*
-!public/uploads/.gitkeep
+*.db-shm
+*.db-wal
 
 # logs and tooling
 npm-debug.log*
@@ -27,3 +27,8 @@ yarn-error.log*
 .DS_Store
 *.tsbuildinfo
 next-env.d.ts
+
+# Local build/runtime artifacts
+.open-next
+.wrangler
+cloudflare-env.d.ts

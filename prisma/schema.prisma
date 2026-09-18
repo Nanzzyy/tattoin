@@ -1,10 +1,9 @@
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
 }
 
 model PortfolioItem {
@@ -12,6 +11,7 @@ model PortfolioItem {
   title       String
   slug        String   @unique
   imageUrl    String
+  imageKey    String?
   altText     String
   description String?
   style       String

@@ -1,11 +1,11 @@
 import { randomUUID } from "node:crypto";
-import { mkdir, unlink } from "node:fs/promises";
-import path from "node:path";
 import sharp from "sharp";
+import { deleteObject, publicObjectUrl, putObject } from "@/lib/r2";
 
 const MAX_FILE_SIZE = 8 * 1024 * 1024;
 const ALLOWED_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/avif"]);
-const uploadDirectory = path.join(process.cwd(), "public", "uploads");
+
+export type StoredImage = { imageUrl: string; imageKey: string };
 
 export async function savePortfolioImage(file: File) {
   if (!file.size) return null;
@@ -17,25 +17,20 @@ export async function savePortfolioImage(file: File) {
   const metadata = await image.metadata();
   if (!metadata.width || !metadata.height) throw new Error("File gambar tidak dapat dibaca.");
 
-  await mkdir(uploadDirectory, { recursive: true });
-  const filename = `${randomUUID()}.webp`;
-  await image
+  const imageKey = `portfolio/${randomUUID()}.webp`;
+  const imageUrl = publicObjectUrl(imageKey);
+  const output = await image
     .rotate()
     .resize({ width: 1800, height: 1800, fit: "inside", withoutEnlargement: true })
     .webp({ quality: 86, smartSubsample: true })
-    .toFile(path.join(uploadDirectory, filename));
+    .toBuffer();
 
-  return `/uploads/${filename}`;
+  await putObject(imageKey, output);
+
+  return { imageUrl, imageKey } satisfies StoredImage;
 }
 
-export async function deleteUploadedImage(imageUrl: string) {
-  if (!imageUrl.startsWith("/uploads/")) return;
-  const filename = path.basename(imageUrl);
-  if (!/^[a-f0-9-]+\.webp$/i.test(filename)) return;
-
-  try {
-    await unlink(path.join(uploadDirectory, filename));
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
-  }
+export async function deleteUploadedImage(imageKey?: string | null) {
+  if (!imageKey || !/^portfolio\/[a-f0-9-]+\.webp$/i.test(imageKey)) return;
+  await deleteObject(imageKey);
 }

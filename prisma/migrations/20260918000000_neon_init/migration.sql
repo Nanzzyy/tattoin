@@ -1,21 +1,25 @@
--- CreateTable
+-- Initial Type B schema for Neon PostgreSQL.
+-- Binary media is stored in Cloudflare R2; imageKey is the object reference.
+
 CREATE TABLE "PortfolioItem" (
-    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "id" SERIAL NOT NULL,
     "title" TEXT NOT NULL,
     "slug" TEXT NOT NULL,
     "imageUrl" TEXT NOT NULL,
+    "imageKey" TEXT,
     "altText" TEXT NOT NULL,
     "description" TEXT,
     "style" TEXT NOT NULL,
     "featured" BOOLEAN NOT NULL DEFAULT false,
     "sortOrder" INTEGER NOT NULL DEFAULT 0,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "PortfolioItem_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
 CREATE TABLE "PriceItem" (
-    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "id" SERIAL NOT NULL,
     "serviceName" TEXT NOT NULL,
     "price" INTEGER NOT NULL,
     "description" TEXT,
@@ -23,45 +27,41 @@ CREATE TABLE "PriceItem" (
     "duration" TEXT,
     "featured" BOOLEAN NOT NULL DEFAULT false,
     "sortOrder" INTEGER NOT NULL DEFAULT 0,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "PriceItem_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
 CREATE TABLE "AdminUser" (
-    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "id" SERIAL NOT NULL,
     "username" TEXT NOT NULL,
     "passwordHash" TEXT NOT NULL,
     "failedLoginCount" INTEGER NOT NULL DEFAULT 0,
-    "lockedUntil" DATETIME,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL
+    "lockedUntil" TIMESTAMP(3),
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "AdminUser_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
 CREATE TABLE "Session" (
-    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "id" SERIAL NOT NULL,
     "tokenHash" TEXT NOT NULL,
     "adminId" INTEGER NOT NULL,
-    "expiresAt" DATETIME NOT NULL,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT "Session_adminId_fkey" FOREIGN KEY ("adminId") REFERENCES "AdminUser" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+    "expiresAt" TIMESTAMP(3) NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "Session_pkey" PRIMARY KEY ("id")
 );
 
--- CreateIndex
 CREATE UNIQUE INDEX "PortfolioItem_slug_key" ON "PortfolioItem"("slug");
-
--- CreateIndex
 CREATE INDEX "PortfolioItem_sortOrder_createdAt_idx" ON "PortfolioItem"("sortOrder", "createdAt");
-
--- CreateIndex
 CREATE INDEX "PriceItem_category_sortOrder_idx" ON "PriceItem"("category", "sortOrder");
-
--- CreateIndex
 CREATE UNIQUE INDEX "AdminUser_username_key" ON "AdminUser"("username");
-
--- CreateIndex
 CREATE UNIQUE INDEX "Session_tokenHash_key" ON "Session"("tokenHash");
-
--- CreateIndex
 CREATE INDEX "Session_expiresAt_idx" ON "Session"("expiresAt");
+
+ALTER TABLE "Session"
+  ADD CONSTRAINT "Session_adminId_fkey"
+  FOREIGN KEY ("adminId") REFERENCES "AdminUser"("id") ON DELETE CASCADE ON UPDATE CASCADE;

@@ -1,25 +1,48 @@
 import "dotenv/config";
-import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
-import { PrismaClient } from "../generated/prisma/client";
+import { PrismaNeon } from "@prisma/adapter-neon";
+import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
-const configuredUrl = process.env.DATABASE_URL ?? "file:./dev.db";
-const runtimeUrl = configuredUrl.startsWith("file:./")
-  ? `file:./prisma/${configuredUrl.slice("file:./".length)}`
-  : configuredUrl;
-const adapter = new PrismaBetterSqlite3({ url: runtimeUrl });
+function directConnectionUrl() {
+  const configured = process.env.DIRECT_URL;
+  if (configured) {
+    try {
+      if (!new URL(configured).hostname.includes(".REGION.")) return configured;
+    } catch {
+      // Fall through to the pooled URL below.
+    }
+  }
+
+  const pooled = process.env.DATABASE_URL;
+  if (!pooled) return undefined;
+
+  try {
+    const url = new URL(pooled);
+    url.hostname = url.hostname.replace("-pooler.", ".");
+    return url.toString();
+  } catch {
+    return undefined;
+  }
+}
+
+const connectionString = directConnectionUrl();
+if (!connectionString) throw new Error("DIRECT_URL atau DATABASE_URL belum dikonfigurasi.");
+
+const adapter = new PrismaNeon({ connectionString });
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
-  const username = process.env.ADMIN_USERNAME ?? "admin";
-  const password = process.env.ADMIN_PASSWORD ?? "InkAndIron!2026";
+  const username = (process.env.ADMIN_USERNAME ?? "admin").trim().toLowerCase();
+  const password = process.env.ADMIN_PASSWORD;
+  if (!password) throw new Error("ADMIN_PASSWORD wajib diisi sebelum menjalankan seed.");
   const passwordHash = await bcrypt.hash(password, 12);
 
-  await prisma.adminUser.upsert({
-    where: { username },
-    update: { passwordHash, failedLoginCount: 0, lockedUntil: null },
-    create: { username, passwordHash },
-  });
+  const existingAdmin = await prisma.adminUser.findUnique({ where: { username } });
+  if (!existingAdmin) {
+    await prisma.adminUser.create({ data: { username, passwordHash } });
+  } else if (process.env.RESET_ADMIN_PASSWORD === "true") {
+    await prisma.adminUser.update({ where: { username }, data: { passwordHash, failedLoginCount: 0, lockedUntil: null } });
+  }
 
   const portfolio = [
     { title: "Nocturne Raven", slug: "nocturne-raven", imageUrl: "/images/portfolio-raven.png", altText: "Blackwork raven and botanical tattoo on an upper arm", description: "Blackwork composition with botanical linework and a quiet, gothic rhythm.", style: "Blackwork", featured: true, sortOrder: 1 },

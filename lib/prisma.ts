@@ -1,17 +1,19 @@
-import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
-import { PrismaClient } from "@/generated/prisma/client";
+import { PrismaNeon } from "@prisma/adapter-neon";
+import { PrismaClient } from "@prisma/client";
 
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 
-const configuredUrl = process.env.DATABASE_URL ?? "file:./dev.db";
-const runtimeUrl = configuredUrl.startsWith("file:./")
-  ? `file:./prisma/${configuredUrl.slice("file:./".length)}`
-  : configuredUrl;
-const adapter = new PrismaBetterSqlite3({ url: runtimeUrl });
+export function getPrisma() {
+  if (!globalForPrisma.prisma) {
+    const connectionString = process.env.DATABASE_URL;
+    if (!connectionString) throw new Error("DATABASE_URL belum dikonfigurasi.");
 
-export const prisma = globalForPrisma.prisma ?? new PrismaClient({
-  adapter,
-  log: process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"],
-});
+    const adapter = new PrismaNeon({ connectionString });
+    globalForPrisma.prisma = new PrismaClient({
+      adapter,
+      log: process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"],
+    });
+  }
 
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+  return globalForPrisma.prisma;
+}

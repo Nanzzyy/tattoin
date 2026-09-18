@@ -1,0 +1,17 @@
+.git
+.github
+.next
+.open-next
+.wrangler
+node_modules
+generated
+prisma/*.db
+prisma/*.db-*
+public/uploads/*
+!public/uploads/.gitkeep
+*.log
+.env*
+!.env.example
+Dockerfile*
+docker-compose*.yml
+docker-compose*.yaml

@@ -2,7 +2,7 @@ import { createHash, randomBytes } from "node:crypto";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import bcrypt from "bcryptjs";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 
 const SESSION_COOKIE = "tattoin_session";
 const SESSION_DURATION_SECONDS = 60 * 60 * 24 * 7;
@@ -15,6 +15,7 @@ function hashToken(token: string) {
 }
 
 export async function createSession(adminId: number) {
+  const prisma = await getPrisma();
   const token = randomBytes(32).toString("base64url");
   const expiresAt = new Date(Date.now() + SESSION_DURATION_SECONDS * 1000);
 
@@ -34,6 +35,7 @@ export async function createSession(adminId: number) {
 }
 
 export async function destroySession() {
+  const prisma = await getPrisma();
   const cookieStore = await cookies();
   const token = cookieStore.get(SESSION_COOKIE)?.value;
 
@@ -45,6 +47,7 @@ export async function destroySession() {
 }
 
 export async function getCurrentAdmin() {
+  const prisma = await getPrisma();
   const token = (await cookies()).get(SESSION_COOKIE)?.value;
   if (!token) return null;
 
@@ -68,6 +71,7 @@ export type LoginResult =
   | { ok: false; message: string };
 
 export async function verifyLogin(username: string, password: string): Promise<LoginResult> {
+  const prisma = await getPrisma();
   const normalizedUsername = username.trim().toLowerCase();
   const admin = await prisma.adminUser.findUnique({ where: { username: normalizedUsername } });
 
