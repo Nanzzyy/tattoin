@@ -1,5 +1,12 @@
 # TATTOIN — Tattoo Studio & CMS
 
+## Live deployment
+
+- Public site: [https://tattoin.vercel.app](https://tattoin.vercel.app) — checked on 2026-10-07; HTTP GET returned `200`.
+- URL identified from the user's Vercel dashboard screenshot. README changes document the observed deployment; they do not configure Vercel or trigger deployment.
+
+Use this link in a portfolio only if the project owner has approved public display and the site contains no private/customer data.
+
 Production-ready tattoo studio landing page and built-in content management system, built with Next.js App Router, Prisma, Neon PostgreSQL, Cloudflare R2, and vanilla CSS.
 
 ## Local setup
